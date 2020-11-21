@@ -1,46 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import SearchBar from './SearchBar';
-import youtube from '../apis/youtube';
 import VideoList from './VideoList';
 import VideoDetail from './VideoDetail';
-
-const PART = 'snippet'
-const KEY = 'AIzaSyD8m8dI5TSldsZq00xVnSFfN95fhsi7-f0';
-const MAX_RESULTS = 15;
-const TYPE = 'video';
+import useVideos from '../hooks/useVideos';
 
 const App = () => {
 
-  const [videos, setVideos] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [videos, search] = useVideos('Latest anime of 2020');
 
-  const onFormSubmit = async text => {
-    try {
-      const result = await youtube.get('/search', {
-        params: {
-          q: text,
-          part: PART,
-          maxResults: MAX_RESULTS,
-          key: KEY,
-          type: TYPE
-        }
-      });
-
-      setVideos(result.data.items);
-      setSelectedVideo(result.data.items[0]);
-
-    } catch(err) {
-      throw new Error(err.message);
-    }
-  };
-
-  const onVideoSelect = video => setSelectedVideo(video);
-
-  useEffect(() => onFormSubmit('Latest anime of 2020'), []);
+  useEffect(() => setSelectedVideo(videos[0]), [videos]);
 
   return (
     <div className="ui container">
-      <SearchBar onFormSubmit={onFormSubmit} />
+      <SearchBar onFormSubmit={search} />
       <div className="ui grid">
         <div className="ui row">
           <div className="eleven wide column">
@@ -49,7 +22,7 @@ const App = () => {
           <div className="five wide column">
             <VideoList 
               videos={videos}
-              onVideoSelect={onVideoSelect}
+              onVideoSelect={setSelectedVideo}
             />
           </div>
         </div>
